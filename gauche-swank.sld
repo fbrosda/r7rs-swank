@@ -2,7 +2,8 @@
   (export start-swank
           swank:lookup-presented-object
           swank:lookup-presented-object-or-lose)
-  (import (scheme base) 
+  (import (except (scheme base) symbol->string)
+          (rename (scheme base) (symbol->string r7rs:symbol->string))
           (scheme eval) 
           (scheme read) 
           (scheme write) 

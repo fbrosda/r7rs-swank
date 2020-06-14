@@ -29,13 +29,12 @@
                  ": "
                  (map write-to-string (error-object-irritants error))))
 
-;;(define sts symbol->string)
-;;(define (symbol->string x)
-;;  (cond ((keyword? x)
-;;         (string-append ":" (keyword->string x)))
-;;        ((symbol? x)
-;;         (sts x))
-;;        (error "not symbol or keyword" x)))
+(define (symbol->string x)
+  (cond ((keyword? x)
+         (string-append ":" (keyword->string x)))
+        ((symbol? x)
+         (r7rs:symbol->string x))
+        (else (error "not symbol or keyword" x))))
 
 (define ($output-to-repl thunk)
   ;; basic implementation, print all output at the end, this should
