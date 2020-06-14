@@ -1,5 +1,7 @@
 (define debug? #f)
 
+(set-signal-handler! SIGINT #t)
+
 (define (debug-log . rest)
   (when debug?
     (for-each (lambda (r)
