@@ -29,13 +29,13 @@
                  ": "
                  (map write-to-string (error-object-irritants error))))
 
-(define sts symbol->string)
-(define (symbol->string x)
-  (cond ((keyword? x)
-         (string-append ":" (keyword->string x)))
-        ((symbol? x)
-         (sts x))
-        (error "not symbol or keyword" x)))
+;;(define sts symbol->string)
+;;(define (symbol->string x)
+;;  (cond ((keyword? x)
+;;         (string-append ":" (keyword->string x)))
+;;        ((symbol? x)
+;;         (sts x))
+;;        (error "not symbol or keyword" x)))
 
 (define ($output-to-repl thunk)
   ;; basic implementation, print all output at the end, this should
@@ -96,7 +96,7 @@
 (define ($completions prefix env-name)
   (let ((result '()))
     (define (search m)
-      (hash-table-for-each (module-table m)
+      (hash-table-for-each (module-table m)  
                            (lambda (symbol value)
                              (if (string-prefix? prefix (symbol->string symbol))
                                  (set! result (cons (symbol->string symbol) result))))))
@@ -131,7 +131,7 @@
 (define ($apropos name)
   (let ((result '()))
     (define (search m)
-      (hash-table-for-each (module-table m)
+      (hash-table-for-each (module-table m)  
                            (lambda (symbol value)
                              (if (string-contains (symbol->string symbol) name)
                                  (set! result (cons (list symbol ':function #f) result))))))
