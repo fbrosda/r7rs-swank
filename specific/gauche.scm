@@ -8,13 +8,15 @@
   (macroexpand-all form))
 
 (define ($open-tcp-server port-number port-file handler)
-  (let* ((n (or port-number (+ 10000 (random-integer 50000))))
-         (socket (make-server-socket 'inet n ':reuse-addr? #t)))
-    (handler n socket)))
+  (let* ((actual-port-number (or port-number (+ 10000 (random-integer 50000))))
+         (socket (make-server-socket 'inet actual-port-number ':reuse-addr? #t)))
+    (handler actual-port-number socket)))
 
 (define ($tcp-server-accept socket handler)
-  (let ((cs (socket-accept socket)))
-    (handler (socket-input-port cs) (socket-output-port cs))))
+  (let loop ((cs (socket-accept socket)))
+    (call-with-client-socket cs handler)
+    (socket-shutdown cs SHUT_RDWR)
+    (loop (socket-accept socket))))
 
 (define ($all-package-names)
   (map module-name (all-modules)))

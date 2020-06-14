@@ -27,7 +27,10 @@
               (read port)))))
 (define (read-packet port)
   "Read 6 byte ascii hex length, then length bytes, all utf-8"
-  (let* ((length (string->number (utf8->string (read-bytevector 6 port)) 16))
+  (let* ((bytes (read-bytevector 6 port))
+         (length (if (eof-object? bytes)
+                     0
+                     (string->number (utf8->string bytes) 16)))
          (result (make-bytevector length)))
     (let loop ((result-index 0)
                (to-read length))
@@ -60,7 +63,9 @@
 
 (define (process-one-message)
   (let ((form (read-packet (param:slime-in-port))))
-    (write-message (process-form form #f))))
+   (if (eof-object? form)
+       form
+       (write-message (process-form form #f)))))
 
 (define (write-message sexp)
   (write-packet (scheme->message sexp) (param:slime-out-port)))
@@ -93,7 +98,7 @@
 (define (server-loop port-number port-file)
   ($open-tcp-server
    port-number port-file
-   (lambda (actual-port-number data)
+   (lambda (actual-port-number socket)
      (unless port-file
        (debug-log "swank listening on port " actual-port-number))
      (when port-file
@@ -102,13 +107,13 @@
        (with-output-to-file port-file
          (lambda ()
            (display actual-port-number))))
-     ($tcp-server-accept data
+     ($tcp-server-accept socket
                          (lambda (in out)
                            (parameterize ((param:slime-in-port in)
                                           (param:slime-out-port out))
                              (let loop ()
-                               (process-one-message)
-                               (loop))))))))
+                               (unless (eof-object? (process-one-message))
+                                 (loop)))))))))
 
 (define (string-pad-left string size pad)
   (let* ((s-len (string-length string))
