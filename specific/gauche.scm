@@ -27,9 +27,12 @@
     (get-output-string out)))
 
 (define ($error-description error)
-  (apply string-append (error-object-message error)
-                 ": "
-                 (map write-to-string (error-object-irritants error))))
+  (string-append
+    (apply string-append (error-object-message error)
+           ": "
+           (map write-to-string (error-object-irritants error)))
+    "\n>>Original Message:"
+    (report-error error #f)))
 
 (define (symbol->string x)
   (cond ((keyword? x)
@@ -56,6 +59,7 @@
     (cons parameters #f)))
 
 (define ($set-package name)
+  (print name)
   (list "(user)" "(user)"))
 
 (define env (interaction-environment))
