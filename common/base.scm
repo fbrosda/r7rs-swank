@@ -146,8 +146,16 @@
   (hash-table-ref/default *handlers* name #f))
 
 (define (interactive-eval sexp)
-  (let-values ((vals (eval sexp (param:environment)))) ;; TODO environment
-    vals))
+  (let1 out (open-output-string)
+    (unwind-protect
+      (let-values ((vals (with-error-to-port 
+                           out
+                           (cut eval sexp (param:environment))))) ;; TODO environment
+        vals)
+      (let1 outStr (get-output-string out)
+       (unless (string=? "" outStr)
+         (swank/write-string (string-append outStr "\n" ) #f)))
+      (close-port out))))
 
 (define *presentations* (make-hash-table))
 
